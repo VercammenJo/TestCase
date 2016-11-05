@@ -235,7 +235,7 @@ func CreateIndividual (stub *shim.ChaincodeStub, function string, args []string)
 		var anIndividual Individual
 		
 		anIndividual = Individual{args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9], args[10], args[11], args[12], args[13]}
-		buff, err := CompanytoJSON(anIndividual)
+		buff, err := IndividualtoJSON(anIndividual)
 		if err != nil {
 			fmt.Println("CreateIndividual() : Failed Cannot create object buffer for write : ", args[1])
 			return nil, errors.New("CreateIndividual(): Failed Cannot create object buffer for write : " + args[1])
@@ -260,7 +260,7 @@ func UpdateIndividual (stub *shim.ChaincodeStub, function string, args []string)
 		var anIndividual Individual
 		
 		anIndividual = Individual{args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9], args[10], args[11], args[12], args[13]}
-		buff, err := CompanytoJSON(anIndividual)
+		buff, err := IndividualtoJSON(anIndividual)
 		if err != nil {
 			fmt.Println("UpdateIndividual() : Failed Cannot create object buffer for write : ", args[1])
 			return nil, errors.New("UpdateIndividual(): Failed Cannot create object buffer for write : " + args[1])
@@ -484,16 +484,16 @@ func (t *SimpleChaincode) Invoke(stub *shim.ChaincodeStub, function string, args
 	// ./peer chaincode invoke -l golang -n mycc -c '{"Function": "PostBid", "Args":["1111", "BID", "1", "1000", "300", "1200"]}'
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	if ChkReqType(args) == true {
+	//if ChkReqType(args) == true {
 
 		InvokeRequest := InvokeFunction(function)
 		if InvokeRequest != nil {
 			buff, err = InvokeRequest(stub, function, args)
 		}
-	} else {
-		fmt.Println("Invoke() Invalid recType : ", args, "\n")
-		return nil, errors.New("Invoke() : Invalid recType : " + args[0])
-	}
+	//} else {
+	//	fmt.Println("Invoke() Invalid recType : ", args, "\n")
+//		return nil, errors.New("Invoke() : Invalid recType : " + args[0])
+//	}
 
 	return buff, err
 }
@@ -1280,12 +1280,12 @@ func QueryLedger(stub *shim.ChaincodeStub, tableName string, args []string) ([]b
 
 	// Perform Any additional processing of data
 	fmt.Println("QueryLedger() : Successful - Proceeding to ProcessRequestType ")
-	err = ProcessQueryResult(stub, Avalbytes, args)
-	if err != nil {
-		fmt.Println("QueryLedger() : Cannot create object  : ", args[1])
-		jsonResp := "{\"QueryLedger() Error\":\" Cannot create Object for key " + args[0] + "\"}"
-		return nil, errors.New(jsonResp)
-	}
+	//err = ProcessQueryResult(stub, Avalbytes, args)
+	//if err != nil {
+	//	fmt.Println("QueryLedger() : Cannot create object  : ", args[1])
+	//	jsonResp := "{\"QueryLedger() Error\":\" Cannot create Object for key " + args[0] + "\"}"
+	//	return nil, errors.New(jsonResp)
+	//}
 	return Avalbytes, nil
 }
 
