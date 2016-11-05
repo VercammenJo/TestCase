@@ -561,6 +561,8 @@ func GetVersion(stub *shim.ChaincodeStub, function string, args []string) ([]byt
 	return version, nil
 }
 
+
+/*
 //////////////////////////////////////////////////////////////////////////////////////////
 // Retrieve User Information
 // example:
@@ -644,7 +646,7 @@ func ValidateItemOwnership(stub *shim.ChaincodeStub, function string, args []str
 	fmt.Print("ValidateItemOwnership() : Response : Successfull - \n")
 	return Avalbytes, nil
 }
-
+*/
 ///////////////////////////////////////////////////////////////////////
 // Encryption and Decryption Section
 // Images will be Encrypted and stored and the key will be part of the
