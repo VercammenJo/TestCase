@@ -1264,8 +1264,7 @@ func QueryLedger(stub *shim.ChaincodeStub, tableName string, args []string) ([]b
 		columns = append(columns, colNext)
 	}
 
-	//row, err := stub.GetRow(tableName, columns)
-	row := stub.GetRow(tableName, columns)
+	row, err := stub.GetRow(tableName, columns)
 	fmt.Println("Length or number of rows retrieved ", len(row.Columns))
 
 	if len(row.Columns) == 0 {
@@ -1282,11 +1281,11 @@ func QueryLedger(stub *shim.ChaincodeStub, tableName string, args []string) ([]b
 	// Perform Any additional processing of data
 	fmt.Println("QueryLedger() : Successful - Proceeding to ProcessRequestType ")
 	//err = ProcessQueryResult(stub, Avalbytes, args)
-	//if err != nil {
-	//	fmt.Println("QueryLedger() : Cannot create object  : ", args[1])
-	//	jsonResp := "{\"QueryLedger() Error\":\" Cannot create Object for key " + args[0] + "\"}"
-	//	return nil, errors.New(jsonResp)
-	//}
+	if err != nil {
+		fmt.Println("QueryLedger() : Cannot create object  : ", args[1])
+		jsonResp := "{\"QueryLedger() Error\":\" Cannot create Object for key " + args[0] + "\"}"
+		return nil, errors.New(jsonResp)
+	}
 	return Avalbytes, nil
 }
 
