@@ -1264,7 +1264,8 @@ func QueryLedger(stub *shim.ChaincodeStub, tableName string, args []string) ([]b
 		columns = append(columns, colNext)
 	}
 
-	row, err := stub.GetRow(tableName, columns)
+	//row, err := stub.GetRow(tableName, columns)
+	row := stub.GetRow(tableName, columns)
 	fmt.Println("Length or number of rows retrieved ", len(row.Columns))
 
 	if len(row.Columns) == 0 {
