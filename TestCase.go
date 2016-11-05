@@ -25,7 +25,7 @@ under the License.
 package main
 
 import (
-	"bufio"
+	//"bufio"
 	"bytes"
 	"crypto/aes"
 	"crypto/cipher"
@@ -84,7 +84,7 @@ type Individual struct {
 	NationalNumber		string //key
 	Sex					string
 	email				string 
-	BlendedReputation	int
+	BlendedReputation	string
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -104,7 +104,7 @@ type Company struct {
 	State				string
 	CompanyNumber		string //key
 	Type			 	string	 //(Institution,Bank,Company)
-	BlendedReputation	int
+	BlendedReputation	string
 	
 }
 
