@@ -73,8 +73,8 @@ var kycTables = []string{"IndividualTable","CompanyTable","IdentityTable","Relat
 type Individual struct {
 	ID					string  //key
 	Name				string  //key
+    SurName				string  //key
 	SecurityRole		string 
-	SurName				string
 	Street				string
 	HouseNumber			string
 	City				string
@@ -122,8 +122,8 @@ type Document struct {
 	Type 		string   //type of document (Utillity Bill,ID,...)
 	UrlOrg		string
 	UrlOcr		string
-	ExpiryDate	string
-	Approved	bool
+	ExpiryDate	string	//key
+	Approved	bool      //key
 }
 
 
@@ -136,7 +136,7 @@ type Document struct {
 type Relationship struct {
 	
 	DocumentID	string  //key  //hash of the original document where we build the relationship with 
-	Type 		string   //type of relationship (employee, shareholder, ...)
+	Type 		string  //key //type of relationship (employee, shareholder, ...)
 	BelongsTo	string //key 
 	RelatedTo 	string
 	Reputation  string  
@@ -146,7 +146,7 @@ type Relationship struct {
 
 
 ///////////////////////////////////////////////////////////////////////////////////////
-// This creates the relationship
+// This creates the Identity
 // Example:
 // Identity {  }
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -154,7 +154,7 @@ type Relationship struct {
 type Identity struct {
 	
 	DocumentID	string  //key //hash of the original document where we build the relationship with 
-	Type 		string   //type of document (ProofOfIdentity,ProofOfResidence,ProofOf)
+	Type 		string   //key //type of document (ProofOfIdentity,ProofOfResidence,ProofOf)
 	BelongsTo   string  //key
 	Reputation  string  
 }
@@ -183,9 +183,9 @@ func GetNumberOfKeys(tname string) int {
 	TableMap := map[string]int{
 		"IndividualTable": 		4,
 		"CompanyTable":        	3,
-		"IdentityTable":     	2,
-		"RelationshipTable":    2,
-		"DocumentTable":     	1,
+		"IdentityTable":     	3,
+		"RelationshipTable":    3,
+		"DocumentTable":     	3,
 	}
 	return TableMap[tname]
 }
@@ -198,10 +198,16 @@ func GetNumberOfKeys(tname string) int {
 //////////////////////////////////////////////////////////////
 func InvokeFunction(fname string) func(stub *shim.ChaincodeStub, function string, args []string) ([]byte, error) {
 	InvokeFunc := map[string]func(stub *shim.ChaincodeStub, function string, args []string) ([]byte, error){
-		"CreateIndividual":   CreateIndividual,
-		"UpdateIndividual":   UpdateIndividual,
-		"CreateCompany": 	  CreateCompany,
-		"UpdateCompany":      UpdateCompany,
+		"CreateIndividual":   	CreateIndividual,
+		"UpdateIndividual":   	UpdateIndividual,
+		"CreateCompany": 	  	CreateCompany,
+		"UpdateCompany":      	UpdateCompany,
+		"CreateDocument":		CreateDocument,
+		"UpdateDocument":		UpdateDocument,
+		"CreateRelationship": 	CreateRelationship,
+		"UpdateRelationship":	UpdateRelationship,
+		"CreateIdentity": 		CreateIdentity,
+		"UpdateIdentity":		UpdateIdentity,
 	}
 	return InvokeFunc[fname]
 }
@@ -212,9 +218,17 @@ func InvokeFunction(fname string) func(stub *shim.ChaincodeStub, function string
 //////////////////////////////////////////////////////////////
 func QueryFunction(fname string) func(stub *shim.ChaincodeStub, function string, args []string) ([]byte, error) {
 	QueryFunc := map[string]func(stub *shim.ChaincodeStub, function string, args []string) ([]byte, error){
-		"GetIndividual":         GetIndividual,
-		"GetCompany":            GetCompany,
-		"GetVersion":            GetVersion,
+		"GetIndividual":				GetIndividual,
+		"GetCompany":           		GetCompany,
+		"GetDocument":					GetDocument,
+		"GetIdentity":					GetIdentity,
+		"GetRelationship":				GetRelationship,
+		"GetActiveDocuments":			GetActiveDocuments,
+		"GetExpiredDocuments": 			GetExpiredDocuments,
+		"GetRelationshipsBelongingTo":	GetRelationshipsBelongingTo,
+		"GetIdentityBelongingTo":		GetIdentityBelongingTo,
+		"GetIdentityByTypeBelongingTo":	GetIdentityByTypeBelongingTo,
+		"GetVersion":         			GetVersion,
 	}
 	return QueryFunc[fname]
 }
@@ -328,6 +342,175 @@ func UpdateCompany (stub *shim.ChaincodeStub, function string, args []string) ([
 	return buff, err
 }
 
+
+//////////////////////////////////////////////////////////////
+// Create a Relationship into the Ledger Database
+//
+//////////////////////////////////////////////////////////////
+func CreateRelationship (stub *shim.ChaincodeStub, function string, args []string) ([]byte, error) {
+		var aRelationship  Relationship
+		
+		aRelationship = Relationship{args[0], args[1], args[2], args[3], args[4]}
+		buff, err := RelationshiptoJSON(aRelationship)
+		if err != nil {
+			fmt.Println("CreateRelationship() : Failed Cannot create object buffer for write : ", args[1])
+			return nil, errors.New("CreateRelationship(): Failed Cannot create object buffer for write : " + args[1])
+		} else {
+			// Update the ledger with the Buffer Data
+			// err = stub.PutState(args[0], buff)
+			keys := []string{args[0],args[1],args[2]}
+			err = UpdateLedger(stub, "RelationshipTable", keys, buff)
+		if err != nil {
+			fmt.Println("CreateRelationship() : write error while inserting record")
+			return nil, err
+			}
+		}
+	return buff, err
+
+} 
+
+//////////////////////////////////////////////////////////////
+// Update a Relationship from the Ledger Database
+//
+//////////////////////////////////////////////////////////////
+func UpdateRelationship (stub *shim.ChaincodeStub, function string, args []string) ([]byte, error) {
+		var aRelationship  Relationship
+		
+		aRelationship = Relationship{args[0], args[1], args[2], args[3], args[4]}
+		buff, err := RelationshiptoJSON(aRelationship)
+		if err != nil {
+			fmt.Println("UpdateRelationship() : Failed Cannot create object buffer for write : ", args[1])
+			return nil, errors.New("UpdateRelationship(): Failed Cannot create object buffer for write : " + args[1])
+		} else {
+			// Update the ledger with the Buffer Data
+			// err = stub.PutState(args[0], buff)
+			keys := []string{args[0],args[1],args[2]}
+			err = ReplaceLedgerEntry(stub, "RelationshipTable", keys, buff)
+		if err != nil {
+			fmt.Println("UpdateRelationship() : write error while updating record")
+			return nil, err
+			}
+		}
+	return buff, err
+}
+
+
+//////////////////////////////////////////////////////////////
+// Create a Document into the Ledger Database
+//
+//////////////////////////////////////////////////////////////
+func CreateDocument (stub *shim.ChaincodeStub, function string, args []string) ([]byte, error) {
+		var aDocument  Document
+		
+		aDocument = Document{args[0], args[1], args[2], args[3], args[4],args[5],args[6]}
+		buff, err := DocumenttoJSON(aDocument)
+		if err != nil {
+			fmt.Println("CreateDocument() : Failed Cannot create object buffer for write : ", args[1])
+			return nil, errors.New("CreateDocument(): Failed Cannot create object buffer for write : " + args[1])
+		} else {
+			// Update the ledger with the Buffer Data
+			// err = stub.PutState(args[0], buff)
+			keys := []string{args[0],args[2],args[5],args[6]}
+			err = UpdateLedger(stub, "DocumentTable", keys, buff)
+		if err != nil {
+			fmt.Println("CreateDocument() : write error while inserting record")
+			return nil, err
+			}
+		}
+	return buff, err
+
+} 
+
+//////////////////////////////////////////////////////////////
+// Update a Document from the Ledger Database
+//
+//////////////////////////////////////////////////////////////
+func UpdateDocument (stub *shim.ChaincodeStub, function string, args []string) ([]byte, error) {
+		var aDocument  Document
+		
+		aDocument = Document{args[0], args[1], args[2], args[3], args[4],args[5],args[6]}
+		buff, err := DocumenttoJSON(aDocument)
+		if err != nil {
+			fmt.Println("UpdateDocument() : Failed Cannot create object buffer for write : ", args[1])
+			return nil, errors.New("UpdateDocument(): Failed Cannot create object buffer for write : " + args[1])
+		} else {
+			// Update the ledger with the Buffer Data
+			// err = stub.PutState(args[0], buff)
+			keys := []string{args[0],args[2],args[5],args[6]}
+			err = ReplaceLedgerEntry(stub, "DocumentTable", keys, buff)
+		if err != nil {
+			fmt.Println("UpdateDocument() : write error while updating record")
+			return nil, err
+			}
+		}
+	return buff, err
+}
+
+
+	DocumentID	string  //key //hash of the original document where we build the relationship with 
+	Type 		string   //key //type of document (ProofOfIdentity,ProofOfResidence,ProofOf)
+	BelongsTo   string  //key
+	Reputation  string  
+}
+
+
+
+//////////////////////////////////////////////////////////////
+// Create an Identity into the Ledger Database
+//
+//////////////////////////////////////////////////////////////
+func CreateIdentity (stub *shim.ChaincodeStub, function string, args []string) ([]byte, error) {
+		var anIdentity  Identity
+		
+		anIdentity = Identity{args[0], args[1], args[2],args[3]}
+		buff, err := IdentitytoJSON(anIdentity)
+		if err != nil {
+			fmt.Println("CreateIdentity() : Failed Cannot create object buffer for write : ", args[1])
+			return nil, errors.New("CreateIdentity(): Failed Cannot create object buffer for write : " + args[1])
+		} else {
+			// Update the ledger with the Buffer Data
+			// err = stub.PutState(args[0], buff)
+			keys := []string{args[0],args[1],args[2]}
+			err = UpdateLedger(stub, "IdentityTable", keys, buff)
+		if err != nil {
+			fmt.Println("CreateIdentity() : write error while inserting record")
+			return nil, err
+			}
+		}
+	return buff, err
+
+} 
+
+//////////////////////////////////////////////////////////////
+// Update an Identity from the Ledger Database
+//
+//////////////////////////////////////////////////////////////
+func UpdateIdentity (stub *shim.ChaincodeStub, function string, args []string) ([]byte, error) {
+		var anIdentity  Identity
+		
+		anIdentity = Identity{args[0], args[1], args[2],args[3]}
+		buff, err := IdentitytoJSON(anIdentity)
+		if err != nil {
+			fmt.Println("UpdateIdentity() : Failed Cannot create object buffer for write : ", args[1])
+			return nil, errors.New("UpdateIdentity(): Failed Cannot create object buffer for write : " + args[1])
+		} else {
+			// Update the ledger with the Buffer Data
+			// err = stub.PutState(args[0], buff)
+			keys := []string{args[0],args[1],args[2]}
+			err = ReplaceLedgerEntry(stub, "IdentityTable", keys, buff)
+		if err != nil {
+			fmt.Println("UpdateIdentity() : write error while updating record")
+			return nil, err
+			}
+		}
+	return buff, err
+}
+
+
+
+
+
+
 //////////////////////////////////////////////////////////////
 // Retrieve an Individual from the Ledger Database
 //
@@ -376,6 +559,90 @@ func GetCompany (stub *shim.ChaincodeStub, function string, args []string) ([]by
 	}
 
 	fmt.Println("GetCompany() : Response : Successfull -")
+	return Avalbytes, nil
+}
+
+		"GetRelationship":				GetRelationship,
+		"GetActiveDocuments":			GetActiveDocuments,
+		"GetExpiredDocuments": 			GetExpiredDocuments,
+		"GetRelationshipsBelongingTo":	GetRelationshipsBelongingTo,
+		"GetIdentityBelongingTo":		GetIdentityBelongingTo,
+		"GetIdentityByTypeBelongingTo":	GetIdentityByTypeBelongingTo,
+
+//////////////////////////////////////////////////////////////
+// Retrieve a Document into the Ledger Database
+//
+//////////////////////////////////////////////////////////////
+func GetDocument (stub *shim.ChaincodeStub, function string, args []string) ([]byte, error) {
+	var err error
+
+	// Get the Object and Display it
+	Avalbytes, err := QueryLedger(stub, "DocumentTable", args)
+	if err != nil {
+		fmt.Println("GetDocument() : Failed to Query Object ")
+		jsonResp := "{\"Error\":\"Failed to get  Object Data for " + args[0] + "\"}"
+		return nil, errors.New(jsonResp)
+	}
+
+	if Avalbytes == nil {
+		fmt.Println("GetDocument() : Incomplete Query Object ")
+		jsonResp := "{\"Error\":\"Incomplete information about the key for " + args[0] + "\"}"
+		return nil, errors.New(jsonResp)
+	}
+
+	fmt.Println("GetDocument() : Response : Successfull -")
+	return Avalbytes, nil
+}
+
+
+//////////////////////////////////////////////////////////////
+// Retrieve an Identity into the Ledger Database
+//
+//////////////////////////////////////////////////////////////
+func GetIdentity (stub *shim.ChaincodeStub, function string, args []string) ([]byte, error) {
+	var err error
+
+	// Get the Object and Display it
+	Avalbytes, err := QueryLedger(stub, "IdentityTable", args)
+	if err != nil {
+		fmt.Println("GetIdentity() : Failed to Query Object ")
+		jsonResp := "{\"Error\":\"Failed to get  Object Data for " + args[0] + "\"}"
+		return nil, errors.New(jsonResp)
+	}
+
+	if Avalbytes == nil {
+		fmt.Println("GetIdentity() : Incomplete Query Object ")
+		jsonResp := "{\"Error\":\"Incomplete information about the key for " + args[0] + "\"}"
+		return nil, errors.New(jsonResp)
+	}
+
+	fmt.Println("GetIdentity() : Response : Successfull -")
+	return Avalbytes, nil
+}
+
+
+//////////////////////////////////////////////////////////////
+// Retrieve a Relationship into the Ledger Database
+//
+//////////////////////////////////////////////////////////////
+func GetRelationship (stub *shim.ChaincodeStub, function string, args []string) ([]byte, error) {
+	var err error
+
+	// Get the Object and Display it
+	Avalbytes, err := QueryLedger(stub, "RelationshipTable", args)
+	if err != nil {
+		fmt.Println("GetRelationship() : Failed to Query Object ")
+		jsonResp := "{\"Error\":\"Failed to get  Object Data for " + args[0] + "\"}"
+		return nil, errors.New(jsonResp)
+	}
+
+	if Avalbytes == nil {
+		fmt.Println("GetRelationship() : Incomplete Query Object ")
+		jsonResp := "{\"Error\":\"Incomplete information about the key for " + args[0] + "\"}"
+		return nil, errors.New(jsonResp)
+	}
+
+	fmt.Println("GetRelationship() : Response : Successfull -")
 	return Avalbytes, nil
 }
 
@@ -808,8 +1075,45 @@ func tCompare(t1 string, t2 string) bool {
 }
 
 
+//////////////////////////////////////////////////////////
+// Converts an Identity to a JSON String
+//////////////////////////////////////////////////////////
+func IdentitytoJSON(identity Identity) ([]byte, error) {
+
+	ajson, err := json.Marshal(identity)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	return ajson, nil
+}
+
+//////////////////////////////////////////////////////////
+// Converts a Document to a JSON String
+//////////////////////////////////////////////////////////
+func DocumenttoJSON(document Document) ([]byte, error) {
+
+	ajson, err := json.Marshal(document)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	return ajson, nil
+}
 
 
+//////////////////////////////////////////////////////////
+// Converts a Relationship to a JSON String
+//////////////////////////////////////////////////////////
+func RelationshiptoJSON(relationship Relationship) ([]byte, error) {
+
+	ajson, err := json.Marshal(relationship)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	return ajson, nil
+}
 
 
 //////////////////////////////////////////////////////////
@@ -838,6 +1142,50 @@ func CompanytoJSON(company Company) ([]byte, error) {
 	}
 	return ajson, nil
 }
+
+
+//////////////////////////////////////////////////////////
+// Converts a JSON String to an Identity Object 
+//////////////////////////////////////////////////////////
+func JSONtoIdentity(ithis []byte) (Identity, error) {
+
+	identity := Identity{}
+	err := json.Unmarshal(ithis, &identity)
+	if err != nil {
+		fmt.Println("JSONtoIdentity error: ", err)
+		return identity, err
+	}
+	return identity, err
+}
+
+//////////////////////////////////////////////////////////
+// Converts a JSON String to a Document Object 
+//////////////////////////////////////////////////////////
+func JSONtoDocument(ithis []byte) (Document, error) {
+
+	document := Document{}
+	err := json.Unmarshal(ithis, &document)
+	if err != nil {
+		fmt.Println("JSONtoDocument error: ", err)
+		return document, err
+	}
+	return document, err
+}
+
+//////////////////////////////////////////////////////////
+// Converts a JSON String to a Relationship Object 
+//////////////////////////////////////////////////////////
+func JSONtoRelationship(ithis []byte) (Relationship, error) {
+
+	relationship := Relationship{}
+	err := json.Unmarshal(ithis, &relationship)
+	if err != nil {
+		fmt.Println("JSONtoRelationship error: ", err)
+		return relationship, err
+	}
+	return relationship, err
+}
+
 
 
 //////////////////////////////////////////////////////////
@@ -872,170 +1220,6 @@ func JSONtoCompany(ithis []byte) (Company, error) {
 
 
 /*
-
-//////////////////////////////////////////////////////////
-// Converts JSON String to an ART Object
-//////////////////////////////////////////////////////////
-func JSONtoAR(data []byte) (ItemObject, error) {
-
-	ar := ItemObject{}
-	err := json.Unmarshal([]byte(data), &ar)
-	if err != nil {
-		fmt.Println("Unmarshal failed : ", err)
-	}
-
-	return ar, err
-}
-
-//////////////////////////////////////////////////////////
-// Converts an ART Object to a JSON String
-//////////////////////////////////////////////////////////
-func ARtoJSON(ar ItemObject) ([]byte, error) {
-
-	ajson, err := json.Marshal(ar)
-	if err != nil {
-		fmt.Println(err)
-		return nil, err
-	}
-	return ajson, nil
-}
-
-//////////////////////////////////////////////////////////
-// Converts an BID to a JSON String
-//////////////////////////////////////////////////////////
-func ItemLogtoJSON(item ItemLog) ([]byte, error) {
-
-	ajson, err := json.Marshal(item)
-	if err != nil {
-		fmt.Println(err)
-		return nil, err
-	}
-	return ajson, nil
-}
-
-//////////////////////////////////////////////////////////
-// Converts an User Object to a JSON String
-//////////////////////////////////////////////////////////
-func JSONtoItemLog(ithis []byte) (ItemLog, error) {
-
-	item := ItemLog{}
-	err := json.Unmarshal(ithis, &item)
-	if err != nil {
-		fmt.Println("JSONtoItemLog error: ", err)
-		return item, err
-	}
-	return item, err
-}
-
-//////////////////////////////////////////////////////////
-// Converts an Auction Request to a JSON String
-//////////////////////////////////////////////////////////
-func AucReqtoJSON(ar AuctionRequest) ([]byte, error) {
-
-	ajson, err := json.Marshal(ar)
-	if err != nil {
-		fmt.Println(err)
-		return nil, err
-	}
-	return ajson, nil
-}
-
-//////////////////////////////////////////////////////////
-// Converts an User Object to a JSON String
-//////////////////////////////////////////////////////////
-func JSONtoAucReq(areq []byte) (AuctionRequest, error) {
-
-	ar := AuctionRequest{}
-	err := json.Unmarshal(areq, &ar)
-	if err != nil {
-		fmt.Println("JSONtoAucReq error: ", err)
-		return ar, err
-	}
-	return ar, err
-}
-
-//////////////////////////////////////////////////////////
-// Converts BID Object to JSON String
-//////////////////////////////////////////////////////////
-func BidtoJSON(myHand Bid) ([]byte, error) {
-
-	ajson, err := json.Marshal(myHand)
-	if err != nil {
-		fmt.Println("BidtoJSON error: ", err)
-		return nil, err
-	}
-	return ajson, nil
-}
-
-//////////////////////////////////////////////////////////
-// Converts JSON String to BID Object
-//////////////////////////////////////////////////////////
-func JSONtoBid(areq []byte) (Bid, error) {
-
-	myHand := Bid{}
-	err := json.Unmarshal(areq, &myHand)
-	if err != nil {
-		fmt.Println("JSONtoBid error: ", err)
-		return myHand, err
-	}
-	return myHand, err
-}
-
-//////////////////////////////////////////////////////////
-// Converts an User Object to a JSON String
-//////////////////////////////////////////////////////////
-func UsertoJSON(user UserObject) ([]byte, error) {
-
-	ajson, err := json.Marshal(user)
-	if err != nil {
-		fmt.Println("UsertoJSON error: ", err)
-		return nil, err
-	}
-	fmt.Println("UsertoJSON created: ", ajson)
-	return ajson, nil
-}
-
-//////////////////////////////////////////////////////////
-// Converts an User Object to a JSON String
-//////////////////////////////////////////////////////////
-func JSONtoUser(user []byte) (UserObject, error) {
-
-	ur := UserObject{}
-	err := json.Unmarshal(user, &ur)
-	if err != nil {
-		fmt.Println("JSONtoUser error: ", err)
-		return ur, err
-	}
-	fmt.Println("JSONtoUser created: ", ur)
-	return ur, err
-}
-
-//////////////////////////////////////////////////////////
-// Converts an Item Transaction to a JSON String
-//////////////////////////////////////////////////////////
-func TrantoJSON(at ItemTransaction) ([]byte, error) {
-
-	ajson, err := json.Marshal(at)
-	if err != nil {
-		fmt.Println(err)
-		return nil, err
-	}
-	return ajson, nil
-}
-
-//////////////////////////////////////////////////////////
-// Converts an Trans Object to a JSON String
-//////////////////////////////////////////////////////////
-func JSONtoTran(areq []byte) (ItemTransaction, error) {
-
-	at := ItemTransaction{}
-	err := json.Unmarshal(areq, &at)
-	if err != nil {
-		fmt.Println("JSONtoTran error: ", err)
-		return at, err
-	}
-	return at, err
-}
 
 //////////////////////////////////////////////
 // Validates an ID for Well Formed
