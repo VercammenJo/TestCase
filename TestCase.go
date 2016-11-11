@@ -68,7 +68,7 @@ var kycTables = []string{"IndividualTable","CompanyTable","IdentityTable","Relat
 ///////////////////////////////////////////////////////////////////////////////////////
 // This creates a record of the individual
 // Example:
-// Individual {  }
+// Individual { "100000", "Vercammen" , "Jo" , "Individual" , "Boomsesteenweg" , "543" , "Hoboken" ,  "2660" ,"Belgium" , "Vlaanderen" , "80121220836" , "Male" , "jo.vercammen@outlook.com" , "100"   }
 ///////////////////////////////////////////////////////////////////////////////////////
 type Individual struct {
 	ID					string  //key
@@ -90,7 +90,7 @@ type Individual struct {
 ///////////////////////////////////////////////////////////////////////////////////////
 // This creates a record of the Company
 // Example:
-// Company {  }
+// Company { "100001" , "Copernicus BVBA" , "Londonstraat" , "6", "Antwerpen" , "2000" ,,"Belgium" , "Vlaanderen" , "BE080121220836" , "Company" , "100" }
 ///////////////////////////////////////////////////////////////////////////////////////
 
 type Company struct {
@@ -112,7 +112,7 @@ type Company struct {
 ///////////////////////////////////////////////////////////////////////////////////////
 // This creates the related documents
 // Example:
-// Document {  }
+// Document { "12345ef", "12345ef" , "ID" , "URN:Database:ID" ,"URN:Database:IDOCR" , "10102016", "10112016", "False"}
 ///////////////////////////////////////////////////////////////////////////////////////
 
 type Document struct {
@@ -123,6 +123,7 @@ type Document struct {
 	UrlOrg		string
 	UrlOcr		string
 	ExpiryDate	string	//key
+	RegDate 	string
 	Approved	string      //key
 }
 
@@ -130,13 +131,13 @@ type Document struct {
 ///////////////////////////////////////////////////////////////////////////////////////
 // This creates the relationship
 // Example:
-// Relationship {  }
+// Relationship { "12345ee" , "Shareholder" , "100000" , "100001" , "100"  }
 ///////////////////////////////////////////////////////////////////////////////////////
 
 type Relationship struct {
 	
 	DocumentID	string  //key  //hash of the original document where we build the relationship with 
-	Type 		string  //key //type of relationship (employee, shareholder, ...)
+	Type 		string  //key //type of relationship (Employee, Shareholder, ...)
 	BelongsTo	string //key 
 	RelatedTo 	string
 	Reputation  string  
@@ -148,13 +149,13 @@ type Relationship struct {
 ///////////////////////////////////////////////////////////////////////////////////////
 // This creates the Identity
 // Example:
-// Identity {  }
+// Identity { "12345ef" , "ProofOfIdentity" , "100000" , "100"  }
 ///////////////////////////////////////////////////////////////////////////////////////
 
 type Identity struct {
 	
 	DocumentID	string  //key //hash of the original document where we build the relationship with 
-	Type 		string   //key //type of document (ProofOfIdentity,ProofOfResidence,ProofOf)
+	Type 		string   //key //type of document (ProofOfIdentity,ProofOfResidence,ProofOfWealth)
 	BelongsTo   string  //key
 	Reputation  string  
 }
@@ -208,6 +209,11 @@ func InvokeFunction(fname string) func(stub shim.ChaincodeStubInterface, functio
 		"UpdateRelationship":	UpdateRelationship,
 		"CreateIdentity": 		CreateIdentity,
 		"UpdateIdentity":		UpdateIdentity,
+		"DeleteIndividual":		DeleteIndividual,
+		"DeleteCompany":		DeleteCompany,
+		"DeleteDocument": 		DeleteDocument,
+		"DeleteRelationship":	DeleteRelationship,
+		"DeleteIdentity":		DeleteIdentity,	
 	}
 	return InvokeFunc[fname]
 }
@@ -243,7 +249,7 @@ func QueryFunction(fname string) func(stub shim.ChaincodeStubInterface, function
 
 //////////////////////////////////////////////////////////////
 // Create an Individual into the Ledger Database
-//
+// Example: args["100000", "Vercammen" , "Jo" , "Individual" , "Boomsesteenweg" , "543" , "Hoboken" ,  "2660" ,"Belgium" , "Vlaanderen" , "80121220836" , "Male" , "jo.vercammen@outlook.com" , "100" ]
 //////////////////////////////////////////////////////////////
 func CreateIndividual (stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 		var anIndividual Individual
@@ -268,7 +274,7 @@ func CreateIndividual (stub shim.ChaincodeStubInterface, function string, args [
 
 //////////////////////////////////////////////////////////////
 // Update an Individual from the Ledger Database
-//
+//Example: args["100000", "Vercammen" , "Jo" , "Individual" , "Boomsesteenweg" , "544" , "Hoboken" ,  "2660" ,"Belgium" , "Vlaanderen" , "80121220836" , "Male" , "jo.vercammen@outlook.com" , "100" ]
 //////////////////////////////////////////////////////////////
 func UpdateIndividual (stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 		var anIndividual Individual
@@ -293,7 +299,7 @@ func UpdateIndividual (stub shim.ChaincodeStubInterface, function string, args [
 
 //////////////////////////////////////////////////////////////
 // Create a Company into the Ledger Database
-//
+// Example: args["100001" , "Copernicus BVBA" , "Londonstraat" , "6", "Antwerpen" , "2000" ,,"Belgium" , "Vlaanderen" , "BE080121220836" , "Company" , "100" ]
 //////////////////////////////////////////////////////////////
 func CreateCompany (stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 		var aCompany  Company
@@ -319,7 +325,7 @@ func CreateCompany (stub shim.ChaincodeStubInterface, function string, args []st
 
 //////////////////////////////////////////////////////////////
 // Update a Company from the Ledger Database
-//
+//Example: args["100001" , "Copernicus BVBA" , "Londonstraat" , "7", "Antwerpen" , "2000" ,,"Belgium" , "Vlaanderen" , "BE080121220836" , "Company" , "100" ]
 //////////////////////////////////////////////////////////////
 func UpdateCompany (stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 		var aCompany  Company
@@ -345,7 +351,7 @@ func UpdateCompany (stub shim.ChaincodeStubInterface, function string, args []st
 
 //////////////////////////////////////////////////////////////
 // Create a Relationship into the Ledger Database
-//
+//Example: args[ "12345ee" , "Shareholder" , "100000" , "100001" , "100" ]
 //////////////////////////////////////////////////////////////
 func CreateRelationship (stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 		var aRelationship  Relationship
@@ -371,7 +377,7 @@ func CreateRelationship (stub shim.ChaincodeStubInterface, function string, args
 
 //////////////////////////////////////////////////////////////
 // Update a Relationship from the Ledger Database
-//
+//Example: args[ "12345ee" , "Shareholder" , "100000" , "100001" , "110" ]
 //////////////////////////////////////////////////////////////
 func UpdateRelationship (stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 		var aRelationship  Relationship
@@ -397,12 +403,12 @@ func UpdateRelationship (stub shim.ChaincodeStubInterface, function string, args
 
 //////////////////////////////////////////////////////////////
 // Create a Document into the Ledger Database
-//
+//Example: args["12345ef", "12345ef" , "ID" , "URN:Database:ID" ,"URN:Database:IDOCR" , "10102016", "10112016", "False"]
 //////////////////////////////////////////////////////////////
 func CreateDocument (stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 		var aDocument  Document
 		
-		aDocument = Document{args[0], args[1], args[2], args[3], args[4],args[5],args[6]}
+		aDocument = Document{args[0], args[1], args[2], args[3], args[4],args[5],args[6],args[7]}
 		buff, err := DocumenttoJSON(aDocument)
 		if err != nil {
 			fmt.Println("CreateDocument() : Failed Cannot create object buffer for write : ", args[1])
@@ -410,7 +416,7 @@ func CreateDocument (stub shim.ChaincodeStubInterface, function string, args []s
 		} else {
 			// Update the ledger with the Buffer Data
 			// err = stub.PutState(args[0], buff)
-			keys := []string{args[0],args[2],args[5],args[6]}
+			keys := []string{args[0],args[2],args[5],args[7]}
 			err = UpdateLedger(stub, "DocumentTable", keys, buff)
 		if err != nil {
 			fmt.Println("CreateDocument() : write error while inserting record")
@@ -423,12 +429,12 @@ func CreateDocument (stub shim.ChaincodeStubInterface, function string, args []s
 
 //////////////////////////////////////////////////////////////
 // Update a Document from the Ledger Database
-//
+////Example: args["12345ef", "12345ef" , "ID" , "URN:Database:ID" ,"URN:Database:IDOCR" , "10102016", "10112016", "True"]
 //////////////////////////////////////////////////////////////
 func UpdateDocument (stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 		var aDocument  Document
 		
-		aDocument = Document{args[0], args[1], args[2], args[3], args[4],args[5],args[6]}
+		aDocument = Document{args[0], args[1], args[2], args[3], args[4],args[5],args[6], args[7]}
 		buff, err := DocumenttoJSON(aDocument)
 		if err != nil {
 			fmt.Println("UpdateDocument() : Failed Cannot create object buffer for write : ", args[1])
@@ -436,7 +442,7 @@ func UpdateDocument (stub shim.ChaincodeStubInterface, function string, args []s
 		} else {
 			// Update the ledger with the Buffer Data
 			// err = stub.PutState(args[0], buff)
-			keys := []string{args[0],args[2],args[5],args[6]}
+			keys := []string{args[0],args[2],args[5],args[7]}
 			err = ReplaceLedgerEntry(stub, "DocumentTable", keys, buff)
 		if err != nil {
 			fmt.Println("UpdateDocument() : write error while updating record")
@@ -450,7 +456,7 @@ func UpdateDocument (stub shim.ChaincodeStubInterface, function string, args []s
 
 //////////////////////////////////////////////////////////////
 // Create an Identity into the Ledger Database
-//
+//Example: args["12345ef" , "ProofOfIdentity" , "100000" , "100" ]
 //////////////////////////////////////////////////////////////
 func CreateIdentity (stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 		var anIdentity  Identity
@@ -476,7 +482,7 @@ func CreateIdentity (stub shim.ChaincodeStubInterface, function string, args []s
 
 //////////////////////////////////////////////////////////////
 // Update an Identity from the Ledger Database
-//
+////Example: args["12345ef" , "ProofOfIdentity" , "100000" , "110" ]
 //////////////////////////////////////////////////////////////
 func UpdateIdentity (stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 		var anIdentity  Identity
@@ -506,7 +512,7 @@ func UpdateIdentity (stub shim.ChaincodeStubInterface, function string, args []s
 
 //////////////////////////////////////////////////////////////
 // Retrieve an Individual from the Ledger Database
-//
+//Example: args[100000]
 //////////////////////////////////////////////////////////////
 func GetIndividual (stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 	var err error
@@ -532,7 +538,7 @@ func GetIndividual (stub shim.ChaincodeStubInterface, function string, args []st
 
 //////////////////////////////////////////////////////////////
 // Retrieve a Company into the Ledger Database
-//
+//Example: args[100001]
 //////////////////////////////////////////////////////////////
 func GetCompany (stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 	var err error
@@ -558,7 +564,7 @@ func GetCompany (stub shim.ChaincodeStubInterface, function string, args []strin
 
 //////////////////////////////////////////////////////////////
 // Retrieve a Document into the Ledger Database
-//
+//Example: args[12345ef]
 //////////////////////////////////////////////////////////////
 func GetDocument (stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 	var err error
@@ -579,12 +585,12 @@ func GetDocument (stub shim.ChaincodeStubInterface, function string, args []stri
 
 	fmt.Println("GetDocument() : Response : Successfull -")
 	return Avalbytes, nil
-}
+}12345ee
 
 
 //////////////////////////////////////////////////////////////
 // Retrieve an Identity into the Ledger Database
-//
+//Example: args[12345ef]
 //////////////////////////////////////////////////////////////
 func GetIdentity (stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 	var err error
@@ -610,7 +616,7 @@ func GetIdentity (stub shim.ChaincodeStubInterface, function string, args []stri
 
 //////////////////////////////////////////////////////////////
 // Retrieve a Relationship into the Ledger Database
-//
+//Example: args[12345ee]
 //////////////////////////////////////////////////////////////
 func GetRelationship (stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 	var err error
@@ -632,6 +638,120 @@ func GetRelationship (stub shim.ChaincodeStubInterface, function string, args []
 	fmt.Println("GetRelationship() : Response : Successfull -")
 	return Avalbytes, nil
 }
+
+
+
+//////////////////////////////////////////////////////////////
+// Delete a Relationship from the Ledger Database
+////Example: args[12345ee]
+//////////////////////////////////////////////////////////////
+func DeleteRelationship (stub shim.ChaincodeStubInterface, function string, args []string) ([]string, error) {
+	var err error
+
+	err = DeleteFromLedger(stub,"RelationshipTable",args)	
+	if err != nil {
+		fmt.Println("DeleteRelationship() : Failed to Query Object ")
+		jsonResp := "{\"Error\":\"Failed to get  Object Data for " + args[0] + "\"}"
+		return "Error", errors.New(jsonResp)
+	}
+
+	fmt.Println("DeleteRelationship() : Response : Successfull -")
+	return "OK", nil
+}
+
+//////////////////////////////////////////////////////////////
+// Delete an Identity from the Ledger Database
+////Example: args[12345ef]
+//////////////////////////////////////////////////////////////
+func DeleteIdentity (stub shim.ChaincodeStubInterface, function string, args []string) ([]string, error) {
+	var err error
+
+	err = DeleteFromLedger(stub,"IdentityTable",args)	
+	if err != nil {
+		fmt.Println("DeleteIdentity() : Failed to Query Object ")
+		jsonResp := "{\"Error\":\"Failed to get  Object Data for " + args[0] + "\"}"
+		return "Error", errors.New(jsonResp)
+	}
+
+	fmt.Println("DeleteIdentity() : Response : Successfull -")
+	return "OK", nil
+}
+
+
+//////////////////////////////////////////////////////////////
+// Delete a Document from the Ledger Database
+////Example: args[12345ef]
+//////////////////////////////////////////////////////////////
+func DeleteDocument (stub shim.ChaincodeStubInterface, function string, args []string) ([]string, error) {
+	var err error
+
+	err = DeleteFromLedger(stub,"DocumentTable",args)	
+	if err != nil {
+		fmt.Println("DeleteDocument() : Failed to Query Object ")
+		jsonResp := "{\"Error\":\"Failed to get  Object Data for " + args[0] + "\"}"
+		return "Error", errors.New(jsonResp)
+	}
+
+	fmt.Println("DeleteDocument() : Response : Successfull -")
+	return "OK", nil
+}
+
+
+//////////////////////////////////////////////////////////////
+// Delete a Document from the Ledger Database
+//
+//////////////////////////////////////////////////////////////
+func DeleteDocument (stub shim.ChaincodeStubInterface, function string, args []string) ([]string, error) {
+	var err error
+
+	err = DeleteFromLedger(stub,"DocumentTable",args)	
+	if err != nil {
+		fmt.Println("DeleteDocument() : Failed to Query Object ")
+		jsonResp := "{\"Error\":\"Failed to get  Object Data for " + args[0] + "\"}"
+		return "Error", errors.New(jsonResp)
+	}
+
+	fmt.Println("DeleteDocument() : Response : Successfull -")
+	return "OK", nil
+}
+
+//////////////////////////////////////////////////////////////
+// Delete an Individual from the Ledger Database
+////Example: args[100000]
+//////////////////////////////////////////////////////////////
+func DeleteIndividual (stub shim.ChaincodeStubInterface, function string, args []string) ([]string, error) {
+	var err error
+
+	err = DeleteFromLedger(stub,"IndividualTable",args)	
+	if err != nil {
+		fmt.Println("DeleteIndividual() : Failed to Query Object ")
+		jsonResp := "{\"Error\":\"Failed to get  Object Data for " + args[0] + "\"}"
+		return "Error", errors.New(jsonResp)
+	}
+
+	fmt.Println("DeleteIndividual() : Response : Successfull -")
+	return "OK", nil
+}
+
+
+//////////////////////////////////////////////////////////////
+// Delete a Company from the Ledger Database
+////Example: args[100001]
+//////////////////////////////////////////////////////////////
+func DeleteCompany (stub shim.ChaincodeStubInterface, function string, args []string) ([]string, error) {
+	var err error
+
+	err = DeleteFromLedger(stub,"CompanyTable",args)	
+	if err != nil {
+		fmt.Println("DeleteCompany() : Failed to Query Object ")
+		jsonResp := "{\"Error\":\"Failed to get  Object Data for " + args[0] + "\"}"
+		return "Error", errors.New(jsonResp)
+	}
+
+	fmt.Println("DeleteCompany() : Response : Successfull -")
+	return "OK", nil
+}
+
 
 
 
