@@ -585,7 +585,7 @@ func GetDocument (stub shim.ChaincodeStubInterface, function string, args []stri
 
 	fmt.Println("GetDocument() : Response : Successfull -")
 	return Avalbytes, nil
-}12345ee
+}
 
 
 //////////////////////////////////////////////////////////////
@@ -681,25 +681,6 @@ func DeleteIdentity (stub shim.ChaincodeStubInterface, function string, args []s
 //////////////////////////////////////////////////////////////
 // Delete a Document from the Ledger Database
 ////Example: args[12345ef]
-//////////////////////////////////////////////////////////////
-func DeleteDocument (stub shim.ChaincodeStubInterface, function string, args []string) ([]string, error) {
-	var err error
-
-	err = DeleteFromLedger(stub,"DocumentTable",args)	
-	if err != nil {
-		fmt.Println("DeleteDocument() : Failed to Query Object ")
-		jsonResp := "{\"Error\":\"Failed to get  Object Data for " + args[0] + "\"}"
-		return "Error", errors.New(jsonResp)
-	}
-
-	fmt.Println("DeleteDocument() : Response : Successfull -")
-	return "OK", nil
-}
-
-
-//////////////////////////////////////////////////////////////
-// Delete a Document from the Ledger Database
-//
 //////////////////////////////////////////////////////////////
 func DeleteDocument (stub shim.ChaincodeStubInterface, function string, args []string) ([]string, error) {
 	var err error
