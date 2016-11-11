@@ -645,7 +645,7 @@ func GetRelationship (stub shim.ChaincodeStubInterface, function string, args []
 // Delete a Relationship from the Ledger Database
 ////Example: args[12345ee]
 //////////////////////////////////////////////////////////////
-func DeleteRelationship (stub shim.ChaincodeStubInterface, function string, args []string) ([]string, error) {
+func DeleteRelationship (stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 	var err error
 
 	err = DeleteFromLedger(stub,"RelationshipTable",args)	
@@ -663,7 +663,7 @@ func DeleteRelationship (stub shim.ChaincodeStubInterface, function string, args
 // Delete an Identity from the Ledger Database
 ////Example: args[12345ef]
 //////////////////////////////////////////////////////////////
-func DeleteIdentity (stub shim.ChaincodeStubInterface, function string, args []string) ([]string, error) {
+func DeleteIdentity (stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 	var err error
 
 	err = DeleteFromLedger(stub,"IdentityTable",args)	
@@ -682,7 +682,7 @@ func DeleteIdentity (stub shim.ChaincodeStubInterface, function string, args []s
 // Delete a Document from the Ledger Database
 ////Example: args[12345ef]
 //////////////////////////////////////////////////////////////
-func DeleteDocument (stub shim.ChaincodeStubInterface, function string, args []string) ([]string, error) {
+func DeleteDocument (stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 	var err error
 
 	err = DeleteFromLedger(stub,"DocumentTable",args)	
@@ -700,7 +700,7 @@ func DeleteDocument (stub shim.ChaincodeStubInterface, function string, args []s
 // Delete an Individual from the Ledger Database
 ////Example: args[100000]
 //////////////////////////////////////////////////////////////
-func DeleteIndividual (stub shim.ChaincodeStubInterface, function string, args []string) ([]string, error) {
+func DeleteIndividual (stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 	var err error
 
 	err = DeleteFromLedger(stub,"IndividualTable",args)	
@@ -719,7 +719,7 @@ func DeleteIndividual (stub shim.ChaincodeStubInterface, function string, args [
 // Delete a Company from the Ledger Database
 ////Example: args[100001]
 //////////////////////////////////////////////////////////////
-func DeleteCompany (stub shim.ChaincodeStubInterface, function string, args []string) ([]string, error) {
+func DeleteCompany (stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 	var err error
 
 	err = DeleteFromLedger(stub,"CompanyTable",args)	
