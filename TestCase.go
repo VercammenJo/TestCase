@@ -447,13 +447,6 @@ func UpdateDocument (stub *shim.ChaincodeStub, function string, args []string) (
 }
 
 
-	DocumentID	string  //key //hash of the original document where we build the relationship with 
-	Type 		string   //key //type of document (ProofOfIdentity,ProofOfResidence,ProofOf)
-	BelongsTo   string  //key
-	Reputation  string  
-}
-
-
 
 //////////////////////////////////////////////////////////////
 // Create an Identity into the Ledger Database
@@ -562,12 +555,6 @@ func GetCompany (stub *shim.ChaincodeStub, function string, args []string) ([]by
 	return Avalbytes, nil
 }
 
-		"GetRelationship":				GetRelationship,
-		"GetActiveDocuments":			GetActiveDocuments,
-		"GetExpiredDocuments": 			GetExpiredDocuments,
-		"GetRelationshipsBelongingTo":	GetRelationshipsBelongingTo,
-		"GetIdentityBelongingTo":		GetIdentityBelongingTo,
-		"GetIdentityByTypeBelongingTo":	GetIdentityByTypeBelongingTo,
 
 //////////////////////////////////////////////////////////////
 // Retrieve a Document into the Ledger Database
