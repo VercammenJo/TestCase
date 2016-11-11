@@ -123,7 +123,7 @@ type Document struct {
 	UrlOrg		string
 	UrlOcr		string
 	ExpiryDate	string	//key
-	Approved	bool      //key
+	Approved	string      //key
 }
 
 
@@ -196,8 +196,8 @@ func GetNumberOfKeys(tname string) int {
 // during an invoke
 //
 //////////////////////////////////////////////////////////////
-func InvokeFunction(fname string) func(stub *shim.ChaincodeStub, function string, args []string) ([]byte, error) {
-	InvokeFunc := map[string]func(stub *shim.ChaincodeStub, function string, args []string) ([]byte, error){
+func InvokeFunction(fname string) func(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
+	InvokeFunc := map[string]func(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error){
 		"CreateIndividual":   	CreateIndividual,
 		"UpdateIndividual":   	UpdateIndividual,
 		"CreateCompany": 	  	CreateCompany,
@@ -216,8 +216,8 @@ func InvokeFunction(fname string) func(stub *shim.ChaincodeStub, function string
 // Query Functions based on Function name
 //
 //////////////////////////////////////////////////////////////
-func QueryFunction(fname string) func(stub *shim.ChaincodeStub, function string, args []string) ([]byte, error) {
-	QueryFunc := map[string]func(stub *shim.ChaincodeStub, function string, args []string) ([]byte, error){
+func QueryFunction(fname string) func(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
+	QueryFunc := map[string]func(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error){
 		"GetIndividual":				GetIndividual,
 		"GetCompany":           		GetCompany,
 		"GetDocument":					GetDocument,
@@ -245,7 +245,7 @@ func QueryFunction(fname string) func(stub *shim.ChaincodeStub, function string,
 // Create an Individual into the Ledger Database
 //
 //////////////////////////////////////////////////////////////
-func CreateIndividual (stub *shim.ChaincodeStub, function string, args []string) ([]byte, error) {
+func CreateIndividual (stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 		var anIndividual Individual
 		
 		anIndividual = Individual{args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9], args[10], args[11], args[12], args[13]}
@@ -270,7 +270,7 @@ func CreateIndividual (stub *shim.ChaincodeStub, function string, args []string)
 // Update an Individual from the Ledger Database
 //
 //////////////////////////////////////////////////////////////
-func UpdateIndividual (stub *shim.ChaincodeStub, function string, args []string) ([]byte, error) {
+func UpdateIndividual (stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 		var anIndividual Individual
 		
 		anIndividual = Individual{args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9], args[10], args[11], args[12], args[13]}
@@ -295,7 +295,7 @@ func UpdateIndividual (stub *shim.ChaincodeStub, function string, args []string)
 // Create a Company into the Ledger Database
 //
 //////////////////////////////////////////////////////////////
-func CreateCompany (stub *shim.ChaincodeStub, function string, args []string) ([]byte, error) {
+func CreateCompany (stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 		var aCompany  Company
 		
 		aCompany = Company{args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9], args[10]}
@@ -321,7 +321,7 @@ func CreateCompany (stub *shim.ChaincodeStub, function string, args []string) ([
 // Update a Company from the Ledger Database
 //
 //////////////////////////////////////////////////////////////
-func UpdateCompany (stub *shim.ChaincodeStub, function string, args []string) ([]byte, error) {
+func UpdateCompany (stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 		var aCompany  Company
 		
 		aCompany = Company{args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9], args[10]}
@@ -347,7 +347,7 @@ func UpdateCompany (stub *shim.ChaincodeStub, function string, args []string) ([
 // Create a Relationship into the Ledger Database
 //
 //////////////////////////////////////////////////////////////
-func CreateRelationship (stub *shim.ChaincodeStub, function string, args []string) ([]byte, error) {
+func CreateRelationship (stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 		var aRelationship  Relationship
 		
 		aRelationship = Relationship{args[0], args[1], args[2], args[3], args[4]}
@@ -373,7 +373,7 @@ func CreateRelationship (stub *shim.ChaincodeStub, function string, args []strin
 // Update a Relationship from the Ledger Database
 //
 //////////////////////////////////////////////////////////////
-func UpdateRelationship (stub *shim.ChaincodeStub, function string, args []string) ([]byte, error) {
+func UpdateRelationship (stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 		var aRelationship  Relationship
 		
 		aRelationship = Relationship{args[0], args[1], args[2], args[3], args[4]}
@@ -399,7 +399,7 @@ func UpdateRelationship (stub *shim.ChaincodeStub, function string, args []strin
 // Create a Document into the Ledger Database
 //
 //////////////////////////////////////////////////////////////
-func CreateDocument (stub *shim.ChaincodeStub, function string, args []string) ([]byte, error) {
+func CreateDocument (stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 		var aDocument  Document
 		
 		aDocument = Document{args[0], args[1], args[2], args[3], args[4],args[5],args[6]}
@@ -425,7 +425,7 @@ func CreateDocument (stub *shim.ChaincodeStub, function string, args []string) (
 // Update a Document from the Ledger Database
 //
 //////////////////////////////////////////////////////////////
-func UpdateDocument (stub *shim.ChaincodeStub, function string, args []string) ([]byte, error) {
+func UpdateDocument (stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 		var aDocument  Document
 		
 		aDocument = Document{args[0], args[1], args[2], args[3], args[4],args[5],args[6]}
@@ -452,7 +452,7 @@ func UpdateDocument (stub *shim.ChaincodeStub, function string, args []string) (
 // Create an Identity into the Ledger Database
 //
 //////////////////////////////////////////////////////////////
-func CreateIdentity (stub *shim.ChaincodeStub, function string, args []string) ([]byte, error) {
+func CreateIdentity (stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 		var anIdentity  Identity
 		
 		anIdentity = Identity{args[0], args[1], args[2],args[3]}
@@ -478,7 +478,7 @@ func CreateIdentity (stub *shim.ChaincodeStub, function string, args []string) (
 // Update an Identity from the Ledger Database
 //
 //////////////////////////////////////////////////////////////
-func UpdateIdentity (stub *shim.ChaincodeStub, function string, args []string) ([]byte, error) {
+func UpdateIdentity (stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 		var anIdentity  Identity
 		
 		anIdentity = Identity{args[0], args[1], args[2],args[3]}
@@ -508,7 +508,7 @@ func UpdateIdentity (stub *shim.ChaincodeStub, function string, args []string) (
 // Retrieve an Individual from the Ledger Database
 //
 //////////////////////////////////////////////////////////////
-func GetIndividual (stub *shim.ChaincodeStub, function string, args []string) ([]byte, error) {
+func GetIndividual (stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 	var err error
 
 	// Get the Object and Display it
@@ -534,7 +534,7 @@ func GetIndividual (stub *shim.ChaincodeStub, function string, args []string) ([
 // Retrieve a Company into the Ledger Database
 //
 //////////////////////////////////////////////////////////////
-func GetCompany (stub *shim.ChaincodeStub, function string, args []string) ([]byte, error) {
+func GetCompany (stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 	var err error
 
 	// Get the Object and Display it
@@ -560,7 +560,7 @@ func GetCompany (stub *shim.ChaincodeStub, function string, args []string) ([]by
 // Retrieve a Document into the Ledger Database
 //
 //////////////////////////////////////////////////////////////
-func GetDocument (stub *shim.ChaincodeStub, function string, args []string) ([]byte, error) {
+func GetDocument (stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 	var err error
 
 	// Get the Object and Display it
@@ -586,7 +586,7 @@ func GetDocument (stub *shim.ChaincodeStub, function string, args []string) ([]b
 // Retrieve an Identity into the Ledger Database
 //
 //////////////////////////////////////////////////////////////
-func GetIdentity (stub *shim.ChaincodeStub, function string, args []string) ([]byte, error) {
+func GetIdentity (stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 	var err error
 
 	// Get the Object and Display it
@@ -612,7 +612,7 @@ func GetIdentity (stub *shim.ChaincodeStub, function string, args []string) ([]b
 // Retrieve a Relationship into the Ledger Database
 //
 //////////////////////////////////////////////////////////////
-func GetRelationship (stub *shim.ChaincodeStub, function string, args []string) ([]byte, error) {
+func GetRelationship (stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 	var err error
 
 	// Get the Object and Display it
@@ -687,7 +687,7 @@ func main() {
 // SimpleChaincode - Init Chaincode implementation - The following sequence of transactions can be used to test the Chaincode
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-func (t *SimpleChaincode) Init(stub *shim.ChaincodeStub, function string, args []string) ([]byte, error) {
+func (t *SimpleChaincode) Init(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 
 	// TODO - Include all initialization to be complete before Invoke and Query
 	// TODO - Include initial bootstrap function
@@ -725,7 +725,7 @@ func (t *SimpleChaincode) Init(stub *shim.ChaincodeStub, function string, args [
 // User can update Companies
 ////////////////////////////////////////////////////////////////
 
-func (t *SimpleChaincode) Invoke(stub *shim.ChaincodeStub, function string, args []string) ([]byte, error) {
+func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 	var err error
 	var buff []byte
 
@@ -760,7 +760,7 @@ func (t *SimpleChaincode) Invoke(stub *shim.ChaincodeStub, function string, args
 // ./peer chaincode query -l golang -n mycc -c '{"Function": "GetItem", "Args": ["2000"]}'
 //////////////////////////////////////////////////////////////////////////////////////////
 
-func (t *SimpleChaincode) Query(stub *shim.ChaincodeStub, function string, args []string) ([]byte, error) {
+func (t *SimpleChaincode) Query(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 	var err error
 	var buff []byte
 	fmt.Println("ID Extracted and Type = ", args[0])
@@ -793,7 +793,7 @@ func (t *SimpleChaincode) Query(stub *shim.ChaincodeStub, function string, args 
 // ./peer chaincode query -l golang -n mycc -c '{"Function": "GetVersion", "Args": ["version"]}'
 //
 //////////////////////////////////////////////////////////////////////////////////////////
-func GetVersion(stub *shim.ChaincodeStub, function string, args []string) ([]byte, error) {
+func GetVersion(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 	if len(args) < 1 {
 		fmt.Println("GetVersion() : Requires 1 argument 'version'")
 		return nil, errors.New("GetVersion() : Requires 1 argument 'version'")
@@ -823,7 +823,7 @@ func GetVersion(stub *shim.ChaincodeStub, function string, args []string) ([]byt
 // ./peer chaincode query -l golang -n mycc -c '{"Function": "GetUser", "Args": ["100"]}'
 //
 //////////////////////////////////////////////////////////////////////////////////////////
-func GetUser(stub *shim.ChaincodeStub, function string, args []string) ([]byte, error) {
+func GetUser(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 
 	var err error
 
@@ -852,7 +852,7 @@ func GetUser(stub *shim.ChaincodeStub, function string, args []string) ([]byte, 
 // ./peer chaincode query -l golang -n mycc -c '{"Function": "ValidateItemOwnership", "Args": ["1000", "100", "tGEBaZuKUBmwTjzNEyd+nr/fPUASuVJAZ1u7gha5fJg="]}'
 //
 /////////////////////////////////////////////////////////////////////////////////////////
-func ValidateItemOwnership(stub *shim.ChaincodeStub, function string, args []string) ([]byte, error) {
+func ValidateItemOwnership(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 
 	var err error
 
@@ -1227,7 +1227,7 @@ func validateID(id string) error {
 // Validate if the User Information Exists
 // in the block-chain
 ////////////////////////////////////////////////////////////////////////////
-func ValidateMember(stub *shim.ChaincodeStub, owner string) ([]byte, error) {
+func ValidateMember(stub shim.ChaincodeStubInterface, owner string) ([]byte, error) {
 
 	// Get the Item Objects and Display it
 	// Avalbytes, err := stub.GetState(owner)
@@ -1254,7 +1254,7 @@ func ValidateMember(stub *shim.ChaincodeStub, owner string) ([]byte, error) {
 // Validate if the User Information Exists
 // in the block-chain
 ////////////////////////////////////////////////////////////////////////////
-func ValidateItemSubmission(stub *shim.ChaincodeStub, artId string) ([]byte, error) {
+func ValidateItemSubmission(stub shim.ChaincodeStubInterface, artId string) ([]byte, error) {
 
 	// Get the Item Objects and Display it
 	args := []string{artId, "ARTINV"}
@@ -1289,7 +1289,7 @@ func ValidateItemSubmission(stub *shim.ChaincodeStub, artId string) ([]byte, err
 //  - InitAuctionTriggerReg()
 //  - etc. etc.
 ////////////////////////////////////////////////////////////////////////////
-func InitLedger(stub *shim.ChaincodeStub, tableName string) error {
+func InitLedger(stub shim.ChaincodeStubInterface, tableName string) error {
 
     //TODO: Table Creation Function.....
 
@@ -1331,7 +1331,7 @@ func InitLedger(stub *shim.ChaincodeStub, tableName string) error {
 // Open a User Registration Table if one does not exist
 // Register users into this table
 ////////////////////////////////////////////////////////////////////////////
-func UpdateLedger(stub *shim.ChaincodeStub, tableName string, keys []string, args []byte) error {
+func UpdateLedger(stub shim.ChaincodeStubInterface, tableName string, keys []string, args []byte) error {
 
 	nKeys := GetNumberOfKeys(tableName)
 	if nKeys < 1 {
@@ -1365,7 +1365,7 @@ func UpdateLedger(stub *shim.ChaincodeStub, tableName string, keys []string, arg
 // Open a User Registration Table if one does not exist
 // Register users into this table
 ////////////////////////////////////////////////////////////////////////////
-func DeleteFromLedger(stub *shim.ChaincodeStub, tableName string, keys []string) error {
+func DeleteFromLedger(stub shim.ChaincodeStubInterface, tableName string, keys []string) error {
 	var columns []shim.Column
 
 	//nKeys := GetNumberOfKeys(tableName)
@@ -1393,7 +1393,7 @@ func DeleteFromLedger(stub *shim.ChaincodeStub, tableName string, keys []string)
 // Replaces the Entry in the Ledger
 //
 ////////////////////////////////////////////////////////////////////////////
-func ReplaceLedgerEntry(stub *shim.ChaincodeStub, tableName string, keys []string, args []byte) error {
+func ReplaceLedgerEntry(stub shim.ChaincodeStubInterface, tableName string, keys []string, args []byte) error {
 
 	nKeys := GetNumberOfKeys(tableName)
 	if nKeys < 1 {
@@ -1426,7 +1426,7 @@ func ReplaceLedgerEntry(stub *shim.ChaincodeStub, tableName string, keys []strin
 ////////////////////////////////////////////////////////////////////////////
 // Query a User Object by Table Name and Key
 ////////////////////////////////////////////////////////////////////////////
-func QueryLedger(stub *shim.ChaincodeStub, tableName string, args []string) ([]byte, error) {
+func QueryLedger(stub shim.ChaincodeStubInterface, tableName string, args []string) ([]byte, error) {
 
 	var columns []shim.Column
 	nCol := GetNumberOfKeys(tableName)
@@ -1471,7 +1471,7 @@ func QueryLedger(stub *shim.ChaincodeStub, tableName string, args []string) ([]b
 // Get a List of Rows based on query criteria from the OBC
 //
 ////////////////////////////////////////////////////////////////////////////
-func GetList(stub *shim.ChaincodeStub, tableName string, args []string) ([]shim.Row, error) {
+func GetList(stub shim.ChaincodeStubInterface, tableName string, args []string) ([]shim.Row, error) {
 	var columns []shim.Column
 
 	nKeys := GetNumberOfKeys(tableName)
@@ -1572,7 +1572,7 @@ func CheckRequestType(rt string) bool {
 // var recType = []string{"ARTINV", "USER", "BID", "AUCREQ", "POSTTRAN", "OPENAUC", "CLAUC"}
 /////////////////////////////////////////////////////////////////////////////////////////////
 
-func ProcessQueryResult(stub *shim.ChaincodeStub, Avalbytes []byte, args []string) error {
+func ProcessQueryResult(stub shim.ChaincodeStubInterface, Avalbytes []byte, args []string) error {
 
 	// Identify Record Type by scanning the args for one of the recTypes
 	// This is kind of a post-processor once the query fetches the results
